@@ -1,0 +1,53 @@
+Traceback (most recent call last):
+  File "/mnt/data/review_run/unpacked/automobile-sales-recession-analysis/scripts/execute_notebook.py", line 11, in <module>
+    client.execute()
+    ~~~~~~~~~~~~~~^^
+  File "/opt/pyvenv/lib/python3.13/site-packages/jupyter_core/utils/__init__.py", line 165, in wrapped
+    return loop.run_until_complete(inner)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/usr/lib/python3.13/asyncio/base_events.py", line 725, in run_until_complete
+    return future.result()
+           ~~~~~~~~~~~~~^^
+  File "/opt/pyvenv/lib/python3.13/site-packages/nbclient/client.py", line 709, in async_execute
+    await self.async_execute_cell(
+        cell, index, execution_count=self.code_cells_executed + 1
+    )
+  File "/opt/pyvenv/lib/python3.13/site-packages/nbclient/client.py", line 1062, in async_execute_cell
+    await self._check_raise_for_error(cell, cell_index, exec_reply)
+  File "/opt/pyvenv/lib/python3.13/site-packages/nbclient/client.py", line 918, in _check_raise_for_error
+    raise CellExecutionError.from_cell_and_msg(cell, exec_reply_content)
+nbclient.exceptions.CellExecutionError: An error occurred while executing the following cell:
+------------------
+from pathlib import Path
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import folium
+
+sns.set_theme(style="whitegrid")
+DATA_PATH = next((p for p in [Path("../data/historical_automobile_sales.csv"), Path("data/historical_automobile_sales.csv")] if p.exists()), None)
+if DATA_PATH is None:
+    raise FileNotFoundError("Official IBM dataset missing. Run `python scripts/fetch_dataset.py` from repository root.")
+df = pd.read_csv(DATA_PATH)
+required = {"Year", "Month", "Automobile_Sales", "Vehicle_Type", "Recession", "GDP", "Price", "Seasonality_Weight", "Advertising_Expenditure", "unemployment_rate"}
+assert required <= set(df), f"Missing columns: {sorted(required - set(df))}"
+assert df["Recession"].isin([0,1]).all()
+df.head()
+------------------
+
+
+[31m---------------------------------------------------------------------------[39m
+[31mFileNotFoundError[39m                         Traceback (most recent call last)
+[36mCell[39m[36m [39m[32mIn[1][39m[32m, line 11[39m
+[32m      7[39m 
+[32m      8[39m sns.set_theme(style=[33m"whitegrid"[39m)
+[32m      9[39m DATA_PATH = next((p [38;5;28;01mfor[39;00m p [38;5;28;01min[39;00m [Path([33m"../data/historical_automobile_sales.csv"[39m), Path([33m"data/historical_automobile_sales.csv"[39m)] [38;5;28;01mif[39;00m p.exists()), [38;5;28;01mNone[39;00m)
+[32m     10[39m [38;5;28;01mif[39;00m DATA_PATH [38;5;28;01mis[39;00m [38;5;28;01mNone[39;00m:
+[32m---> [39m[32m11[39m     [38;5;28;01mraise[39;00m FileNotFoundError([33m"Official IBM dataset missing. Run `python scripts/fetch_dataset.py` from repository root."[39m)
+[32m     12[39m df = pd.read_csv(DATA_PATH)
+[32m     13[39m required = {[33m"Year"[39m, [33m"Month"[39m, [33m"Automobile_Sales"[39m, [33m"Vehicle_Type"[39m, [33m"Recession"[39m, [33m"GDP"[39m, [33m"Price"[39m, [33m"Seasonality_Weight"[39m, [33m"Advertising_Expenditure"[39m, [33m"unemployment_rate"[39m}
+[32m     14[39m [38;5;28;01massert[39;00m required <= set(df), f"Missing columns: {sorted(required - set(df))}"
+
+[31mFileNotFoundError[39m: Official IBM dataset missing. Run `python scripts/fetch_dataset.py` from repository root.
+

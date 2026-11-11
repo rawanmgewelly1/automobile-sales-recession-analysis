@@ -1,0 +1,7 @@
+Traceback (most recent call last):
+  File "/mnt/data/review_run/unpacked/automobile-sales-recession-analysis/scripts/fetch_dataset.py", line 52, in <module>
+    fetch()
+    ~~~~~^^
+  File "/mnt/data/review_run/unpacked/automobile-sales-recession-analysis/scripts/fetch_dataset.py", line 46, in fetch
+    raise RuntimeError("Could not retrieve official IBM CSV: " + " | ".join(errors))
+RuntimeError: Could not retrieve official IBM CSV: attempt 1: URLError: <urlopen error [Errno -3] Temporary failure in name resolution> | attempt 2: URLError: <urlopen error [Errno -3] Temporary failure in name resolution> | attempt 3: URLError: <urlopen error [Errno -3] Temporary failure in name resolution>

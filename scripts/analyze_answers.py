@@ -22,6 +22,11 @@ def evaluate(path=PATH):
     sports = lookup("SportsCar", "Sports")
     if not {0,1}.issubset(mean.columns):
         raise AssertionError("Both recession conditions are needed")
+    table = mean.rename(columns={0: "Non-recession mean", 1: "Recession mean"}).round(3)
+    markdown = "# Q3 — Original IBM CSV empirical comparison\n\n"
+    markdown += "Source: locally downloaded official IBM historical_automobile_sales.csv. All figures are means.\n\n"
+    markdown += "| Vehicle type | Non-recession mean | Recession mean |\n|---|---:|---:|\n" + "".join(f"| {name} | {row['Non-recession mean']:.3f} | {row['Recession mean']:.3f} |\n" for name, row in table.iterrows()) + "\n\n"
+    (Path(__file__).resolve().parents[1] / "docs" / "q3_vehicle_sales_comparison.md").write_text(markdown, encoding="utf-8")
     print("Average sales by type and recession status:\n", mean.to_string())
     print("Overall average by type:\n", overall.to_string())
     print("\nQ3 statements (None means category missing):")

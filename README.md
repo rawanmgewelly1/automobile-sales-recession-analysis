@@ -51,6 +51,12 @@ Two report modes: **Recession Period Statistics** (disables year selection) and 
 
 No substitute images have been created. Use the instructions in [validation report](docs/validation_report.md) to capture the live application once dependencies and source data are accessible.
 
+## One-command Windows completion
+
+Run `FINISH_ON_WINDOWS.bat` from an Internet-connected Windows machine with Python 3.10+ installed. This creates a local virtual environment, installs requirements, downloads and audits the **official** IBM dataset, computes the Q3 comparison table in `docs/q3_vehicle_sales_comparison.md`, executes the notebook using a clean kernel, runs the test suite, launches the Dash server, waits for an HTTP 200 response, and captures both real full-page browser screenshots after verifying all chart titles. **It does not upload anything to GitHub.** Failures return a nonzero exit code instead of declaring success. Re-run `python -m pytest -q` after successful completion to confirm integration/screenshot tests.
+
+The browser screenshot automation uses an explicit Plotly SVG-title check rather than fixed sleep delays. The local dataset is excluded from Git by default because redistribution permission has not been established.
+
 ## Installation and execution
 
 Requires Python 3.10+ and internet access for the first dataset download.

@@ -16,7 +16,7 @@ The IBM CSV could not be downloaded in this environment. The notebook is not exe
 
 ## Q3 — empirical checks
 
-All five remain **NOT VERIFIED**. Once the official CSV is available, execute `python scripts/analyze_answers.py`. It prints the actual vehicle-type mean sales and truth values for:
+All five remain **NOT VERIFIED**. Once the official CSV is available, execute `python scripts/analyze_answers.py`. It prints the actual vehicle-type mean sales, writes `docs/q3_vehicle_sales_comparison.md`, and prints truth values for:
 
 1. Every vehicle type sells more in non-recession periods.
 2. SmallFamilyCar is lowest in non-recession.

@@ -35,3 +35,16 @@ The evaluator recognizes capitalization and the `Supperminicar` spelling variant
 5. Year is disabled in Recession Period Statistics: **TRUE** — disabled flag is true.
 
 Q7 applies to this repository's reconstructed callback, **not an unavailable original starter**. The correct multiple-choice letter(s) cannot be determined without the original choices.
+
+
+<!-- Q3-VERIFIED-BEGIN -->
+## Q3 — Verified from the local official IBM CSV
+
+1. **TRUE** — Non-recession mean exceeds recession mean for every vehicle type
+2. **FALSE** — SmallFamilyCar has the lowest non-recession mean
+3. **FALSE** — ExecutiveCar has the highest overall (both periods) mean
+4. **TRUE** — SuperMiniCar has higher recession mean than ExecutiveCar
+5. **FALSE** — ExecutiveCar and sports are the bottom two types in both conditions
+
+Select options: **1, 4**. Full data table: `docs/q3_vehicle_sales_comparison.md`.
+<!-- Q3-VERIFIED-END -->

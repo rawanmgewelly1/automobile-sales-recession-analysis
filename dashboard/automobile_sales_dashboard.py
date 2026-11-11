@@ -86,7 +86,10 @@ def create_app(frame=None):
                 value=years[-1], clearable=False, disabled=True)], className="control"),
         ], className="controls"),
         html.Div(id="output-container", className="chart-grid"),
-        html.Footer("Source: IBM Skills Network · Historical Automobile Sales (educational dataset)")
+        html.Footer(
+    "Source: IBM Skills Network · Historical Automobile Sales "
+    "| Developed by Rawan Mahmoud Gewelly"
+)
     ], className="page")
 
     @app.callback(
@@ -98,13 +101,57 @@ def create_app(frame=None):
         # Every report switch reinitializes the year to an actual dataset year.
         return selected_statistics != "Yearly Statistics", years[-1]
 
-    @app.callback(Output("output-container", "children"), Input("dropdown-statistics", "value"), Input("select-year", "value"))
+
+    @app.callback(
+        Output("output-container", "children"),
+        Input("dropdown-statistics", "value"),
+        Input("select-year", "value")
+    )
     def update_output_container(selected_statistics, selected_year):
         figures = report_graphs(selected_statistics, selected_year, frame)
+
         if not figures:
             return html.P("Select a report and an available year to display charts.")
-        return [html.Div(dcc.Graph(figure=f, config={"displaylogo": False}, style={"height": "410px"}), className="chart-item") for f in figures]
+
+        for figure in figures:
+            figure.update_layout(
+                margin=dict(
+                    l=50,
+                    r=30,
+                    t=50,
+                    b=100
+                )
+            )
+
+            figure.add_annotation(
+                text="Created by Rawan Mahmoud Gewelly",
+                xref="paper",
+                yref="paper",
+                x=0.5,
+                y=-0.18,
+                xanchor="center",
+                yanchor="top",
+                showarrow=False,
+                font=dict(
+                    size=10,
+                    color="rgba(80, 80, 80, 0.65)"
+                )
+            )
+
+        return [
+            html.Div(
+                dcc.Graph(
+                    figure=figure,
+                    config={"displaylogo": False},
+                    style={"height": "410px"}
+                ),
+                className="chart-item"
+            )
+            for figure in figures
+        ]
+
     return app
+
 
 if __name__ == "__main__":
     create_app().run(host="127.0.0.1", port=8050, debug=False)

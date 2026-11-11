@@ -29,8 +29,16 @@ def verify_charts(page, titles, year=None):
     if year is not None:
         for idx in (1, 2, 3):
             expect(svg_titles.nth(idx)).to_contain_text(str(year))
-    page.wait_for_function("""() => [...document.querySelectorAll('.chart-item .js-plotly-plot')].length === 4 &&
-        [...document.querySelectorAll('.chart-item .js-plotly-plot')].every(el => el.querySelector('.main-svg .gtitle') && (el.querySelectorAll('.plot').length > 0 || el.querySelectorAll('.slice').length > 0))""", timeout=45000)
+    page.wait_for_function("""() => {
+        const graphs = [...document.querySelectorAll('.chart-item .js-plotly-plot')];
+        return graphs.length === 4 &&
+            graphs.every(el =>
+                el.querySelector('.main-svg .gtitle') &&
+                el._fullLayout &&
+                Array.isArray(el._fullData) &&
+                el._fullData.length > 0
+            );
+    }""", timeout=45000)
 
 def launch_available_browser(playwright):
     """Use a locally installed browser; never trigger a browser download.

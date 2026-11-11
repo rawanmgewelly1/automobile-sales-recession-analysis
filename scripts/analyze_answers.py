@@ -8,6 +8,8 @@ from check_dataset import PATH, validate
 def evaluate(path=PATH):
     validate(path)
     df = pd.read_csv(path)
+    df["Automobile_Sales"] = pd.to_numeric(df["Automobile_Sales"], errors="raise")
+    df["Recession"] = pd.to_numeric(df["Recession"], errors="raise")
     mean = df.groupby(["Vehicle_Type", "Recession"])["Automobile_Sales"].mean().unstack()
     overall = df.groupby("Vehicle_Type")["Automobile_Sales"].mean()
     names = {str(k).casefold().replace(" ", ""): k for k in mean.index}

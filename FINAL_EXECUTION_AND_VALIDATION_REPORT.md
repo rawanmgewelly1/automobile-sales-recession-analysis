@@ -1,56 +1,51 @@
-# Windows completion recovery — execution and validation
+# Final execution and validation report — recovery patch
 
-**Decision: NOT READY FOR COURSERA SUBMISSION** (until a genuine Windows/data run passes).
+**Verdict: PARTIALLY VERIFIED — EXTERNAL VERIFICATION REQUIRED**
 
-## Why the prior Windows run could appear successful without outputs
+This report describes work **actually executed** in the isolated Linux environment on 2026-11-11. It is not a Windows run and does not claim that the IBM data was executed. The user's Windows drive `E:` is not mounted here.
 
-Inspected the uploaded original `FINISH_ON_WINDOWS.bat`, `scripts/finish_on_windows.py`, and `scripts/finalize_validation.py`. The prior Python orchestration used `subprocess.run(..., check=True)` and placed `scripts/finalize_validation.py` **at the end** of the pipeline, after pip installation, CSV acquisition, notebook execution, tests, browser launch, and screenshot capture. A nonzero exit from **any earlier step** prevented the report generator from running. The batch file only showed a console message and exited: it did **not** save a stage-by-stage report or diagnostics. The historical cause on the user's Windows computer cannot be identified without that computer's logs, which the previous runner did not reliably preserve. This is a **confirmed control-flow defect**, not evidence of what failed on that particular Windows run.
+## Source and artifacts
+- Input: `automobile-sales-recession-analysis-WINDOWS-RECOVERY(1).zip`.
+- Original Git history preserved; see `git log` in the project.
+- Local CSV inside input archive: **absent**. User reports a Windows CSV at `E:\automobile-sales-recession-analysis\data\historical_automobile_sales.csv`, 54,244 bytes, SHA256 `53823dde986f772834aac354357d42789bc852198bea716df5d2dd725923546c`. This hash is user-supplied evidence, not independently matched here.
+- Windows logs `05_validate_ibm_csv_schema.log`, `09_automated_tests.log`, `13_final_automated_tests.log`: **absent from uploaded ZIP**. The bundled `execution_results.json` references a prior Linux run (Python 3.13.5), not the Windows 3.14.2 run.
 
-## Targeted recovery changes
+## Root-cause assessment
+1. **CSV schema validator** — plausible direct root cause: `scripts/check_dataset.py` performed comparisons on raw object columns after calling `pd.to_numeric` without assigning its result. Pandas may raise from `comp_method_OBJECT_ARRAY` when a text/numeric object is compared with integer `0`. The new validator parses each expected numeric column to a separate numeric frame before range tests, verifies NaNs and recession flags, preserves raw CSV and reports original dtypes and duplicates. Exact Windows expression remains unconfirmed because the complete Windows traceback was not uploaded.
+2. **Automated tests** — exact failing Windows assertions are **unknown** without the two Windows pytest logs. Regression tests were added and the available local suite passes, but this does not prove resolution of all Windows failures.
+3. **Notebook and Q3** — targeted numeric parsing added; genuine execution not performed without the user-owned CSV.
+4. **Windows runner warning** — `return` inside `finally` could suppress an exception; removed without altering cleanup intent.
 
-1. `FINISH_ON_WINDOWS.bat`: reliably uses the virtual environment's **absolute Python executable**; prints the CSV, notebook, screenshot, and report paths; propagates the runner exit code.
-2. `scripts/finish_on_windows.py`: tracks each stage's status and subprocess exit code in `docs/execution_logs/`, writes `docs/local_execution_verification.md` and JSON evidence after every stage **and in a finalizer**, even on failure, and returns nonzero if required steps fail.
-3. Dataset and notebook tasks can proceed independently when Dash dependencies are unavailable. A valid existing local CSV is retained; network download is attempted only if missing.
-4. `scripts/package_diagnostics.py`: automatically produces `WINDOWS_EXECUTION_DIAGNOSTICS.zip` containing the notebook, answer sheet, generated screenshots if present, Q3 comparison if produced, and all step logs and report, **excluding** the original dataset.
-5. New `tests/test_windows_pipeline_evidence.py` includes regression tests for failed subprocess exit codes, blocked steps, report creation, and exclusion of CSV from the diagnostics.
-6. `.gitignore` excludes machine-specific logs, execution reports, diagnostics archives and the CSV from public Git commits.
-
-## Tests actually executed in the isolated Linux runtime
-
-```text
-python -m pytest -q -rs
-23 passed, 5 skipped, 0 failed
-
-python -m compileall -q scripts dashboard tests
-Exit code 0
-```
-
-A **real failed-pipeline recovery test** was also performed using `PIP_NO_INDEX=1 python scripts/finish_on_windows.py`. The script exited **1**, logged DNS failures for the official IBM CSV and an unavailable Dash distribution, and **created** `docs/local_execution_verification.md`, `docs/execution_logs/execution_results.json`, per-step logs, and `WINDOWS_EXECUTION_DIAGNOSTICS.zip`. This verifies fail-closed *Linux* behavior only, not compatibility with Windows.
-
-## Acceptance evidence
-
-| Requirement | Status | Evidence |
+## Final execution table (this container only)
+| Step | Status | Evidence |
 |---|---|---|
-| Existing project and Git history | PASS | Source ZIP copied before edits; previous commit ancestry retained |
-| Local dataset `data/historical_automobile_sales.csv` | BLOCKED | User reports it exists on their Windows PC, but it is not present in the uploaded ZIP or accessible to this runtime |
-| Notebook output with nine real charts | NOT VERIFIED | Notebook lacks execution counts and real data outputs |
-| Q3 answers based on IBM dataset | NOT VERIFIED | Dataset unavailable here; script ready for Windows run |
-| Q7 source behavior | PASS (source only) | Current code enables year selection in Yearly, disables it in Recession, resets year value on report switch; original starter/real browser not verified |
-| Dash installed and dashboard started | BLOCKED | `dash` unavailable here; no access to the user's Windows session |
-| Genuine Q6/Q8 browser screenshots | NOT VERIFIED | No real screenshots generated or fabricated |
-| Offline automated tests | PASS | 23 passed; 5 skipped in this isolated runtime |
-| Windows execution script | NOT VERIFIED ON WINDOWS | Inspected and corrected; no Windows executor connected |
-| Failure-path logging and report generation | PASS ON LINUX | Exit code 1 with generated report, JSON evidence and diagnostic ZIP |
-| GitHub publication | NOT PERFORMED | No authorized remote or push |
+| Uploaded ZIP extraction | PASS | Archive extracted locally; Git history present |
+| Dataset schema with IBM CSV | BLOCKED | CSV not included in source archive |
+| Q3 real-data calculations | BLOCKED | No original CSV bytes available here |
+| Fresh-kernel notebook execution | BLOCKED | No original CSV bytes available here |
+| Required notebook charts | NOT VERIFIED | Notebook retains unexecuted code cells |
+| Python compilation | PASS | `python -m compileall -q scripts dashboard tests` exit 0 |
+| Automated unit/offline tests | PASS | `python -m pytest -q -rs`: 26 passed, 5 skipped |
+| Real-data integration tests | BLOCKED | 3 skipped; original IBM CSV and/or Dash missing |
+| Dash HTTP test | BLOCKED | Dash unavailable and CSV absent |
+| Browser verification | BLOCKED | Original dataset and running Dash app unavailable |
+| Q6/Q8 genuine screenshots | BLOCKED | No actual browser capture possible |
+| Windows pipeline | NOT VERIFIED | Cannot access `E:` or execute Windows commands |
+| Publication | NOT PERFORMED | No authorized GitHub destination |
 
-## Remaining action on the user's Windows computer
+## Notebook inspection
+- 13 existing code cells in uploaded version.
+- 0 executed code cells and 0 real chart outputs in uploaded version.
+- No fabricated outputs or execution counters inserted by the recovery patch.
 
-The CSV is already at `data/historical_automobile_sales.csv` beside the runner. Replace the existing source files with the updated ZIP while **preserving that `data/` folder** (do not delete/recreate it). Double-click `FINISH_ON_WINDOWS.bat` or run it from Command Prompt in the project root. The runner will not overwrite a valid local CSV. It writes the report **even when a stage fails** and produces:
+## Testing
+- Passed: **26**; failed test assertions: **0**; skipped: **5**.
+- Skipped: 3 real-data integration tests and 2 genuine screenshot checks.
+- Compilation exit code: **0**.
+- No Windows tests claimed.
 
-- `docs/local_execution_verification.md`
-- `docs/execution_logs/execution_results.json` and step `.log` files
-- `WINDOWS_EXECUTION_DIAGNOSTICS.zip`
+## Next Windows execution evidence
+Run the corrected `FINISH_ON_WINDOWS.bat` from the existing project root while retaining the genuine CSV. The script records each stage in `docs/execution_logs`, writes `docs/local_execution_verification.md` and `docs/execution_logs/execution_results.json`, and creates `WINDOWS_EXECUTION_DIAGNOSTICS.zip` even on failure. Upload the diagnostic ZIP to inspect the original failing expressions and confirm real-data corrections. The full end-to-end acceptance decision depends on that actual run.
 
-If the run fails, upload **one file**, `WINDOWS_EXECUTION_DIAGNOSTICS.zip`, for diagnosis. It intentionally excludes the original IBM CSV. If it succeeds, the same archive includes the executed notebook and genuine screenshots for independent checking, while the two PNGs remain in `screenshots/`.
-
-**Do not submit until the real Windows report confirms notebook execution, both screenshots, dashboard browser verification and required integration tests.**
+## Submission readiness
+**PARTIALLY VERIFIED — EXTERNAL VERIFICATION REQUIRED**. A Coursera submission cannot be certified without execution of the original CSV, fresh-kernel notebook, Dash reports and two genuine screenshots.

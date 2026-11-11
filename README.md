@@ -132,3 +132,8 @@ If the earlier batch file appeared to finish but did not create `docs/local_exec
 Your IBM CSV should already be at `data/historical_automobile_sales.csv`. The runner validates and **does not overwrite** an existing valid CSV. Do not replace this local file when upgrading the project source. After running, inspect `docs/local_execution_verification.md`. To share troubleshooting evidence in one file without redistributing IBM data, use the automatically generated `WINDOWS_EXECUTION_DIAGNOSTICS.zip` in the project root. These machine-specific files are excluded from Git.
 
 **Important:** This package's 23 passed / 5 skipped offline tests are not a substitute for the remaining fresh-kernel notebook, live Dash and real browser checks on Windows.
+
+
+## Windows 3.14 CSV-validation recovery
+
+If your IBM CSV already exists at `data/historical_automobile_sales.csv`, keep that exact file and run `RUN_WINDOWS_AND_COLLECT.bat` from the project root. It invokes the unchanged primary `FINISH_ON_WINDOWS.bat`, collects all command output in `docs/execution_logs/windows_console.log` and preserves the exit code. The pipeline generates `docs/local_execution_verification.md`, `docs/execution_logs/execution_results.json`, and `WINDOWS_EXECUTION_DIAGNOSTICS.zip` on both success and ordinary failure paths. If an operation fails, upload that diagnostic ZIP (not the original CSV). See `FINAL_EXECUTION_AND_VALIDATION_REPORT.md` and `docs/recovery_change_log.md` for evidence and limitations.

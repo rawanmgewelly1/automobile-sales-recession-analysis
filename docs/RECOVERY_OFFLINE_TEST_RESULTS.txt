@@ -1,0 +1,8 @@
+......................sssss....                                          [100%]
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_real_data_integration.py:12: Original IBM CSV not present in this runtime
+SKIPPED [1] tests/test_real_data_integration.py:21: IBM CSV or Dash unavailable
+SKIPPED [1] tests/test_real_data_integration.py:33: IBM CSV or Dash unavailable
+SKIPPED [2] tests/test_screenshot_integration.py:10: Authentic live browser screenshot has not been captured
+26 passed, 5 skipped in 2.56s
+compileall exit code 0

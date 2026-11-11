@@ -220,6 +220,7 @@ def main():
         pipe.fatal = True
         pipe.record("Pipeline internal exception", "FAIL", "".join(traceback.format_exception_only(type(exc), exc)).strip())
     finally:
+        report_write_failed = False
         try:
             pipe.stop_server()
             pipe.persist()
@@ -235,7 +236,9 @@ def main():
             print("NOTEBOOK:", ROOT / "notebooks" / "automobile_sales_analysis.ipynb")
         except Exception as exc:
             print("CRITICAL: could not write verification report:", repr(exc), file=sys.stderr)
-            return 2
+            report_write_failed = True
+    if report_write_failed:
+        return 2
     success = bool(pipe.records) and not pipe.fatal and all(r["status"] == "PASS" for r in pipe.records)
     print("FINAL STATUS:", "PASS" if success else "FAIL — see report and step logs", flush=True)
     return 0 if success else 1

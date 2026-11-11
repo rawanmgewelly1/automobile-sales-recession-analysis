@@ -30,7 +30,7 @@ def verify_charts(page, titles, year=None):
         for idx in (1, 2, 3):
             expect(svg_titles.nth(idx)).to_contain_text(str(year))
     page.wait_for_function("""() => [...document.querySelectorAll('.chart-item .js-plotly-plot')].length === 4 &&
-        [...document.querySelectorAll('.chart-item .js-plotly-plot')].every(el => el.querySelector('.main-svg .gtitle') && el.querySelectorAll('.plot').length > 0)""", timeout=45000)
+        [...document.querySelectorAll('.chart-item .js-plotly-plot')].every(el => el.querySelector('.main-svg .gtitle') && (el.querySelectorAll('.plot').length > 0 || el.querySelectorAll('.slice').length > 0))""", timeout=45000)
 
 def capture():
     OUT.mkdir(exist_ok=True)
@@ -43,16 +43,26 @@ def capture():
         assert response and response.status == 200, 'Dashboard HTTP response was not 200'
         expect(page).to_have_title('Automobile Sales Statistics Dashboard')
         year_select = page.locator('#select-year')
-        assert 'is-disabled' in (year_select.get_attribute('class') or '') or year_select.get_attribute('aria-disabled') == 'true'
+        expect(year_select.locator('.Select.is-disabled, .Select--is-disabled')).to_have_count(1, timeout=15000)
         verify_charts(page, RECESSION_TITLES)
         page.screenshot(path=str(OUT / 'RecessionReportgraphs.png'), full_page=True, animations='disabled')
 
         page.locator('#dropdown-statistics').click()
         page.get_by_text('Yearly Statistics', exact=True).last.click()
-        assert 'is-disabled' not in (year_select.get_attribute('class') or '') and year_select.get_attribute('aria-disabled') != 'true'
+        expect(year_select.locator('.Select.is-disabled, .Select--is-disabled')).to_have_count(0, timeout=15000)
         selected = year_select.locator('.Select-value-label').inner_text(timeout=15000).strip()
         assert selected.isdigit(), f'Unexpected year selected: {selected}'
         verify_charts(page, YEARLY_TITLES, year=int(selected))
+        # Change to another actual option to prove the year callback updates charts.
+        year_select.click()
+        available_years = page.locator('.Select-menu-outer .VirtualizedSelectOption, .Select-menu-outer .Select-option')
+        expect(available_years.first).to_be_visible(timeout=15000)
+        choices = [x.strip() for x in available_years.all_inner_texts() if x.strip().isdigit() and x.strip() != selected]
+        if choices:
+            replacement = choices[0]
+            page.locator('.Select-menu-outer .VirtualizedSelectOption, .Select-menu-outer .Select-option').get_by_text(replacement, exact=True).first.click()
+            verify_charts(page, YEARLY_TITLES, year=int(replacement))
+            selected = replacement
         page.screenshot(path=str(OUT / 'YearlyReportgraphs.png'), full_page=True, animations='disabled')
         assert not errors, 'Browser JavaScript errors: ' + repr(errors)
         browser.close()

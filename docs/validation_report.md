@@ -1,3 +1,37 @@
+# Latest verification — 11 November 2026, uploaded COMPLETE(1) ZIP
+
+This section records **new attempts against the uploaded archive**, not previous assistant summaries. The project was extracted and a byte-for-byte copy of the uploaded ZIP was saved separately before modifications. The existing Git commit ancestry was retained.
+
+| Acceptance criterion | Status | Evidence |
+|---|---|---|
+| Original IBM CSV | **BLOCKED** | `scripts/fetch_dataset.py`: three urllib attempts fail `[Errno -3] Temporary failure in name resolution`; `curl`: error 6, could not resolve host; public GitHub raw host also fails DNS. No data fabricated. |
+| Dataset schema and numeric verification | **NOT VERIFIED** | CSV absent. Validation code exists but has not executed on IBM records. |
+| Notebook code and schema | **PASS (static)** | 13 code cells successfully compiled; nbformat validated. Original nine charts plus supplemental historic-rubric chart included. |
+| Notebook fresh-kernel execution | **FAIL (attempted)** | `python scripts/execute_notebook.py` ran but stopped at `FileNotFoundError` for the official CSV. No outputs claimed. |
+| Nine required real-data visualizations | **NOT VERIFIED** | Requires official CSV. |
+| Dash dependency installation | **BLOCKED** | `pip install dash>=2.16,<4` failed with no matching distribution; package index unreachable. Import is missing. |
+| Dash actual startup | **FAIL (attempted)** | `python dashboard/automobile_sales_dashboard.py` raised `ModuleNotFoundError: No module named 'dash'`. |
+| Recession and yearly reports in browser | **NOT VERIFIED** | Neither real-data dashboard mode could be launched. |
+| Real `RecessionReportgraphs.png` | **NOT GENERATED** | Screenshot script cannot run against missing application. |
+| Real `YearlyReportgraphs.png` | **NOT GENERATED** | Same. |
+| Q3 category comparison | **NOT VERIFIED on IBM data** | No original CSV. Writer logic independently exercised with a strictly isolated test fixture and confirmed to produce both table and answer file. Its fixture values are not reported as findings. |
+| Q7 callback behavior | **PASS (source/unit only)** | Dropdown disabled/value Output declarations and mode-switch source verified. No live-browser claim. Original starter not supplied. |
+| Unit and static tests | **PASS (partial)** | `pytest -q -rs`: **15 passed, 5 skipped, 0 failed**. Five skips depend on official data, Dash, or browser screenshots. |
+| Git history | **PASS** | Original commits `7100a9a` and `f155d72` retained. |
+| GitHub publication | **NOT VERIFIED / NOT DONE** | No authenticated remote configured or authorized destination. |
+
+## Targeted corrections in this execution
+
+- Preserved existing user-requested advertising comparison while adding the original IBM Part 1 Task 1.2 recession vehicle-type line comparison as an additional chart. The publicly visible rubric describes the latter version. All chart results remain runtime-computed.
+- Added data-computed printed interpretations below each notebook visualization; no numerical claims embedded in unexecuted outputs.
+- Corrected Q3 category spelling aliases and the writer to append a clearly marked data-verification section to `SUBMISSION_ANSWERS.md` only after original CSV validation.
+- Strengthened screenshot waits to inspect Plotly SVG titles, render layer presence and a changed year. Disabled-state checks now target React Select control descendants.
+- Added independent offline regression tests, a retried official source downloader, and a post-success artifact evidence writer for the Windows completion runner.
+
+**Do not submit Q1/Q4/Q6/Q8 as fully executed artifacts until the documented genuine runtime checks pass.** The final ZIP preserves the code and Git history but does not include a fabricated dataset or fake screenshots.
+
+---
+
 # Validation report — 11 November 2026
 
 ## Provenance and backup

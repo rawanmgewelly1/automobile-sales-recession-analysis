@@ -31,7 +31,8 @@ Python, pandas, NumPy, Matplotlib, Seaborn, Plotly, Dash, Jupyter Notebook, and 
 | Task | Output | Approach |
 | --- | --- | --- |
 | 1.1 | Automobile sales over time | Mean sales by year, line |
-| 1.2 | Advertising expenditure vs sales, non-recession | Two-axis line chart with descriptive scales |
+| 1.2 (custom brief) | Advertising expenditure vs sales, non-recession | Two-axis line chart with descriptive scales |
+| 1.2 (original rubric supplement) | Recession sales trends by vehicle type | Multi-line Seaborn chart; both versions retained |
 | 1.3 | Vehicle type by recession status | Grouped Seaborn bar chart, original assignment API |
 | 1.4 | GDP in recession vs non-recession | Two side-by-side line subplots |
 | 1.5 | Seasonality and sales | Monthly bubble chart sized by mean sales |
@@ -53,7 +54,7 @@ No substitute images have been created. Use the instructions in [validation repo
 
 ## One-command Windows completion
 
-Run `FINISH_ON_WINDOWS.bat` from an Internet-connected Windows machine with Python 3.10+ installed. This creates a local virtual environment, installs requirements, downloads and audits the **official** IBM dataset, computes the Q3 comparison table in `docs/q3_vehicle_sales_comparison.md`, executes the notebook using a clean kernel, runs the test suite, launches the Dash server, waits for an HTTP 200 response, and captures both real full-page browser screenshots after verifying all chart titles. **It does not upload anything to GitHub.** Failures return a nonzero exit code instead of declaring success. Re-run `python -m pytest -q` after successful completion to confirm integration/screenshot tests.
+Run `FINISH_ON_WINDOWS.bat` from an Internet-connected Windows machine with Python 3.10+ installed. This creates a local virtual environment, installs requirements, downloads and audits the **official** IBM dataset, computes the Q3 comparison table in `docs/q3_vehicle_sales_comparison.md`, executes the notebook using a clean kernel, runs the test suite, launches the Dash server, waits for an HTTP 200 response, and captures both real full-page browser screenshots after verifying all chart titles. After successful capture it writes `docs/local_execution_verification.md`, including dataset and PNG SHA-256 checksums and confirmed notebook output counts. **It does not upload anything to GitHub.** Failures return a nonzero exit code instead of declaring success. Re-run `python -m pytest -q` after successful completion to confirm integration/screenshot tests.
 
 The browser screenshot automation uses an explicit Plotly SVG-title check rather than fixed sleep delays. The local dataset is excluded from Git by default because redistribution permission has not been established.
 

@@ -42,6 +42,7 @@ def main():
             wait_for_server(server)
             run('scripts/capture_screenshots.py')
             run('-m', 'pytest', '-q')
+            run('scripts/finalize_validation.py')
         finally:
             server.terminate()
             try: server.wait(timeout=8)

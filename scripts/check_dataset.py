@@ -13,6 +13,8 @@ def validate(path=PATH):
     missing = EXPECTED.difference(df.columns)
     if missing: raise AssertionError(f"Required fields absent: {sorted(missing)}")
     if df.empty: raise AssertionError("Dataset contains zero records")
+    if df["Vehicle_Type"].isna().any(): raise AssertionError("Vehicle types missing")
+    if not {0,1}.issubset(set(df["Recession"])): raise AssertionError("Both recession statuses required")
     if not df["Recession"].isin([0, 1]).all(): raise AssertionError("Unexpected recession flag")
     if not df["Month"].between(1, 12).all(): raise AssertionError("Invalid months")
     numeric = ["Year", "Month", "Recession", "Automobile_Sales", "Advertising_Expenditure", "GDP", "Price", "Seasonality_Weight", "unemployment_rate"]

@@ -7,10 +7,9 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
 CSV = ROOT/'data/historical_automobile_sales.csv'
-pytestmark = pytest.mark.skipif(not CSV.is_file() or importlib.util.find_spec('dash') is None,
-    reason='Official IBM CSV or Dash is unavailable; no integration claim')
 
 
+@pytest.mark.skipif(not CSV.is_file(), reason='Original IBM CSV not present in this runtime')
 def test_real_dataset_schema_and_stats():
     sys.path.insert(0,str(ROOT/'scripts'))
     from check_dataset import validate
@@ -19,6 +18,7 @@ def test_real_dataset_schema_and_stats():
     assert set(result['recession_counts']) == {'0','1'}
 
 
+@pytest.mark.skipif(not CSV.is_file() or importlib.util.find_spec('dash') is None, reason='IBM CSV or Dash unavailable')
 def test_all_eight_charts_with_original_csv():
     sys.path.insert(0,str(ROOT/'dashboard'))
     from automobile_sales_dashboard import load_data, build_recession_figures, build_yearly_figures
@@ -30,6 +30,7 @@ def test_all_eight_charts_with_original_csv():
         assert fig.data and fig.layout.title.text
 
 
+@pytest.mark.skipif(not CSV.is_file() or importlib.util.find_spec('dash') is None, reason='IBM CSV or Dash unavailable')
 def test_dash_callbacks_registered_with_real_data():
     sys.path.insert(0,str(ROOT/'dashboard'))
     from automobile_sales_dashboard import create_app, load_data

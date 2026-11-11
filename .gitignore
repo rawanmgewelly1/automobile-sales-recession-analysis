@@ -18,3 +18,8 @@ env/
 # IBM dataset: redistribution permission not established
 data/*.csv
 !data/.gitkeep
+
+# Machine-specific execution logs and evidence; retained in diagnostic ZIP, not public Git
+docs/execution_logs/
+docs/local_execution_verification.md
+WINDOWS_EXECUTION_DIAGNOSTICS.zip

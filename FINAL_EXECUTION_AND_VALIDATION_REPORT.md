@@ -1,91 +1,56 @@
-# Final execution and validation report
+# Windows completion recovery — execution and validation
 
-**Date:** 2026-11-11  
-**Input:** User-uploaded `automobile-sales-recession-analysis-FINAL (1).zip`  
-**Decision:** **NOT READY FOR SUBMISSION**
+**Decision: NOT READY FOR COURSERA SUBMISSION** (until a genuine Windows/data run passes).
 
-## Source preservation and inspection
+## Why the prior Windows run could appear successful without outputs
 
-- Extracted and inspected the supplied repository, including the existing 13-code-cell notebook, Dash application, tests, `FINISH_ON_WINDOWS.bat`, dependencies, README, submissions and docs.
-- Made a byte-for-byte backup of the uploaded ZIP **outside** this repository, before edits.
-- Preserved existing Git commit ancestry (`7100a9a`, `f155d72`, `7d62832`). No remote is configured.
-- The IBM/Coursera original starter notebooks and complete authenticated evaluation rubric **were not included in the ZIP**. Public descriptions confirm the IBM historical automobile dataset and dashboard assignment but are not a substitute for the original in-course starter and exact evaluation screen.
-- The notebook includes the nine custom-brief charts plus a separate historic-rubric Task 1.2 vehicle-type comparison. Neither was removed. Exact grader matching of the extra chart is not established.
+Inspected the uploaded original `FINISH_ON_WINDOWS.bat`, `scripts/finish_on_windows.py`, and `scripts/finalize_validation.py`. The prior Python orchestration used `subprocess.run(..., check=True)` and placed `scripts/finalize_validation.py` **at the end** of the pipeline, after pip installation, CSV acquisition, notebook execution, tests, browser launch, and screenshot capture. A nonzero exit from **any earlier step** prevented the report generator from running. The batch file only showed a console message and exited: it did **not** save a stage-by-stage report or diagnostics. The historical cause on the user's Windows computer cannot be identified without that computer's logs, which the previous runner did not reliably preserve. This is a **confirmed control-flow defect**, not evidence of what failed on that particular Windows run.
 
-## A. Assignment compliance
+## Targeted recovery changes
 
-| Question | Status | Evidence |
-|---|---|---|
-| Q1: notebook | **BLOCKED** | `notebooks/automobile_sales_analysis.ipynb` exists, 13 code cells; clean-kernel attempt fails in first code cell due to missing official CSV; no execution counts or saved rendered charts. |
-| Q2: Seaborn grouped bar | **VERIFIED (source)** | Notebook preserves `sns.barplot(x='Vehicle_Type', y='Automobile_Sales', hue='Recession', data=df)` and matching imports. |
-| Q3: five vehicle-type statements | **NOT VERIFIED** | `scripts/analyze_answers.py` calculates original-data means if CSV exists. No actual CSV means or answers are asserted. |
-| Q4: Dash script | **BLOCKED** | `dashboard/automobile_sales_dashboard.py` source exists; cannot launch: `ModuleNotFoundError: No module named 'dash'`. |
-| Q5: html.Div | **VERIFIED (concept/code)** | Dash `html.Div` groups layout components and hosts the graph output container. |
-| Q6: recession screenshot | **BLOCKED** | No authentic `screenshots/RecessionReportgraphs.png`; actual app never started. |
-| Q7: callback | **VERIFIED (implemented source only)** | Implemented `select-year.disabled` toggles by report and `select-year.value` resets to the latest dataset year on report switches. For the provided five statements, #2 and #5 match code; #1, #3 (both dropdowns reset), and #4 do not. Original course starter callback and live browser behavior are **not verified**. |
-| Q8: yearly screenshot | **BLOCKED** | No authentic `screenshots/YearlyReportgraphs.png`; actual app never started. |
-| Q9: ad distribution | **VERIFIED (source)** | `px.pie` produces recession advertising distribution by vehicle type, rendered in `dcc.Graph`. |
-| Nine Part 1 charts | **NOT VERIFIED (runtime)** | Implementations are present; source CSV and genuine cell outputs absent. |
-| Eight Part 2 charts | **NOT VERIFIED (runtime)** | Four recession and four yearly Plotly builders exist. Fixture-based tests are not original-data evidence. |
+1. `FINISH_ON_WINDOWS.bat`: reliably uses the virtual environment's **absolute Python executable**; prints the CSV, notebook, screenshot, and report paths; propagates the runner exit code.
+2. `scripts/finish_on_windows.py`: tracks each stage's status and subprocess exit code in `docs/execution_logs/`, writes `docs/local_execution_verification.md` and JSON evidence after every stage **and in a finalizer**, even on failure, and returns nonzero if required steps fail.
+3. Dataset and notebook tasks can proceed independently when Dash dependencies are unavailable. A valid existing local CSV is retained; network download is attempted only if missing.
+4. `scripts/package_diagnostics.py`: automatically produces `WINDOWS_EXECUTION_DIAGNOSTICS.zip` containing the notebook, answer sheet, generated screenshots if present, Q3 comparison if produced, and all step logs and report, **excluding** the original dataset.
+5. New `tests/test_windows_pipeline_evidence.py` includes regression tests for failed subprocess exit codes, blocked steps, report creation, and exclusion of CSV from the diagnostics.
+6. `.gitignore` excludes machine-specific logs, execution reports, diagnostics archives and the CSV from public Git commits.
 
-## B. Execution evidence
-
-| Component | Execution status | Evidence |
-|---|---|---|
-| IBM dataset retrieval | **BLOCKED** | Python urllib retried 3 times: `[Errno -3] Temporary failure in name resolution`. `curl -I` returned exit code 6 (`Could not resolve host`). GitHub Raw and PyPI DNS queries also failed. |
-| Original dataset schema | **NOT VERIFIED** | `data/historical_automobile_sales.csv` absent. No replacement or synthetic data used. |
-| Notebook full execution | **FAIL (attempted)** | `python scripts/execute_notebook.py` raised `FileNotFoundError: Official IBM dataset missing` in first data-loading cell; notebook remained unmodified/unexecuted. |
-| Dash dependency installation | **BLOCKED** | `python -m pip install 'dash>=2.16,<4' --disable-pip-version-check --timeout 3 --retries 0` returned `No matching distribution found` because the package source is inaccessible. |
-| Dashboard actual launch | **FAIL (attempted)** | `python dashboard/automobile_sales_dashboard.py`: `ModuleNotFoundError: No module named 'dash'`. |
-| Real browser tests | **BLOCKED** | No running Dash app or original dataset; no GUI claim. |
-| Q6 screenshot | **BLOCKED** | Not generated; a mock image has not been substituted. |
-| Q8 screenshot | **BLOCKED** | Not generated; a mock image has not been substituted. |
-| Unit/static tests | **PASS** | `python -m pytest -q -rs`: **19 passed, 5 skipped, 0 failed**, Python 3.13.5. |
-| Integration tests | **SKIPPED (3)** | Depend on official CSV and Dash. |
-| Screenshot checks | **SKIPPED (2)** | Depend on genuine rendered PNGs. |
-| Windows batch | **NOT EXECUTED** | This is a Linux Python runtime. `FINISH_ON_WINDOWS.bat` was inspected, but Windows compatibility is not claimed. |
-| GitHub publication | **NOT DONE** | No configured remote or authorized authenticated publication target. |
-
-### Commands and actual outcomes
+## Tests actually executed in the isolated Linux runtime
 
 ```text
 python -m pytest -q -rs
-...................sssss   [100%]
-19 passed, 5 skipped in 3.06s
+23 passed, 5 skipped, 0 failed
 
-python scripts/fetch_dataset.py
-RuntimeError: ... attempt 1/2/3: URLError: [Errno -3] Temporary failure in name resolution
-
-curl -I <official IBM CSV>
-curl: (6) Could not resolve host: cf-courses-data.s3.us.cloud-object-storage.appdomain.cloud
-
-python scripts/execute_notebook.py
-FileNotFoundError: Official IBM dataset missing.
-
-python dashboard/automobile_sales_dashboard.py
-ModuleNotFoundError: No module named 'dash'
-
-python -m pip install 'dash>=2.16,<4' --disable-pip-version-check --timeout 3 --retries 0
-ERROR: No matching distribution found for dash<4,>=2.16
+python -m compileall -q scripts dashboard tests
+Exit code 0
 ```
 
-Detailed error output is preserved under `docs/evidence/`. The PyPI failure is an environment-access limitation, not proof Dash lacks Python compatibility.
+A **real failed-pipeline recovery test** was also performed using `PIP_NO_INDEX=1 python scripts/finish_on_windows.py`. The script exited **1**, logged DNS failures for the official IBM CSV and an unavailable Dash distribution, and **created** `docs/local_execution_verification.md`, `docs/execution_logs/execution_results.json`, per-step logs, and `WINDOWS_EXECUTION_DIAGNOSTICS.zip`. This verifies fail-closed *Linux* behavior only, not compatibility with Windows.
 
-## C. Targeted changes made in this run
+## Acceptance evidence
 
-1. `scripts/fetch_dataset.py`: now checks any existing local file, verifies non-HTML CSV structure and required columns, logs its SHA-256, and **does not overwrite it or perform a network download** when valid. This prevents Windows completion from failing unnecessarily when a legitimate IBM CSV was already obtained locally. A matching schema alone does not prove IBM provenance.
-2. `tests/test_dataset_download_safety.py`: four regression tests verify HTML rejection, missing columns rejection, preservation of existing CSV, and no silent replacement of invalid files. Test fixtures are confined to `tmp_path` and never included in the dataset or analysis.
-3. Updated README to describe this run's verifiable status and the offline-data recovery path.
-4. Preserved all prior analysis, dashboard, screenshot automation and unit tests. No charts, grades, or dataset rows fabricated.
+| Requirement | Status | Evidence |
+|---|---|---|
+| Existing project and Git history | PASS | Source ZIP copied before edits; previous commit ancestry retained |
+| Local dataset `data/historical_automobile_sales.csv` | BLOCKED | User reports it exists on their Windows PC, but it is not present in the uploaded ZIP or accessible to this runtime |
+| Notebook output with nine real charts | NOT VERIFIED | Notebook lacks execution counts and real data outputs |
+| Q3 answers based on IBM dataset | NOT VERIFIED | Dataset unavailable here; script ready for Windows run |
+| Q7 source behavior | PASS (source only) | Current code enables year selection in Yearly, disables it in Recession, resets year value on report switch; original starter/real browser not verified |
+| Dash installed and dashboard started | BLOCKED | `dash` unavailable here; no access to the user's Windows session |
+| Genuine Q6/Q8 browser screenshots | NOT VERIFIED | No real screenshots generated or fabricated |
+| Offline automated tests | PASS | 23 passed; 5 skipped in this isolated runtime |
+| Windows execution script | NOT VERIFIED ON WINDOWS | Inspected and corrected; no Windows executor connected |
+| Failure-path logging and report generation | PASS ON LINUX | Exit code 1 with generated report, JSON evidence and diagnostic ZIP |
+| GitHub publication | NOT PERFORMED | No authorized remote or push |
 
-## D. Submission blockers and smallest manual action
+## Remaining action on the user's Windows computer
 
-**Submission is blocked by original-data and Dash package access.** On an Internet-connected Windows machine: unzip this repository, run `FINISH_ON_WINDOWS.bat` from the root. It installs dependencies, fetches the official CSV, validates it, computes Q3, executes/saves the notebook, launches Dash, verifies titles in a browser, takes real Q6/Q8 screenshots, and validates artifacts. This batch has **not** been executed on Windows here.
+The CSV is already at `data/historical_automobile_sales.csv` beside the runner. Replace the existing source files with the updated ZIP while **preserving that `data/` folder** (do not delete/recreate it). Double-click `FINISH_ON_WINDOWS.bat` or run it from Command Prompt in the project root. The runner will not overwrite a valid local CSV. It writes the report **even when a stage fails** and produces:
 
-If the IBM download endpoint is unavailable but the user has the genuine CSV from the course, place it at `data/historical_automobile_sales.csv` before running the same batch. The corrected downloader validates and retains it. After execution, inspect `docs/local_execution_verification.md` and the two PNGs; share the generated report and any failure log to verify acceptance. To match the live Coursera question options exactly, compare the in-course rubric/starter on the user's account.
+- `docs/local_execution_verification.md`
+- `docs/execution_logs/execution_results.json` and step `.log` files
+- `WINDOWS_EXECUTION_DIAGNOSTICS.zip`
 
-Dataset redistribution permissions remain unverified, and `data/*.csv` is ignored by Git to prevent accidental public redistribution. No GitHub push has been attempted.
+If the run fails, upload **one file**, `WINDOWS_EXECUTION_DIAGNOSTICS.zip`, for diagnosis. It intentionally excludes the original IBM CSV. If it succeeds, the same archive includes the executed notebook and genuine screenshots for independent checking, while the two PNGs remain in `screenshots/`.
 
-## E. Final decision
-
-**NOT READY FOR SUBMISSION.** The full data-dependent notebook, running Dash UI, authentic screenshots, Q3 figures, and live Q7 interaction are mandatory unverified outcomes. A clean local Git project and passing offline tests are not equivalent to end-to-end Coursera completion.
+**Do not submit until the real Windows report confirms notebook execution, both screenshots, dashboard browser verification and required integration tests.**

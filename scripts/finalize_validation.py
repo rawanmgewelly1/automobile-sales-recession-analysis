@@ -27,7 +27,7 @@ def main():
     lines=[
         '# Local execution verification', '',
         f'Generated UTC: {datetime.now(timezone.utc).isoformat()}', '',
-        f'- Official IBM CSV downloaded and schema-validated: **{report["rows"]} records**, {report["columns"]} columns',
+        f'- Locally available IBM-format CSV schema-validated (origin not independently authenticated): **{report["rows"]} records**, {report["columns"]} columns',
         f'- CSV SHA-256: `{sha}`',
         f'- Fresh-kernel notebook code cells executed: **{len(codes)}**',
         f'- Notebook code cells with rendered image outputs: **{figures}**',

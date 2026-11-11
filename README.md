@@ -54,7 +54,7 @@ No substitute images have been created. Use the instructions in [validation repo
 
 ## One-command Windows completion
 
-Run `FINISH_ON_WINDOWS.bat` from an Internet-connected Windows machine with Python 3.10+ installed. This creates a local virtual environment, installs requirements, downloads and audits the **official** IBM dataset, computes the Q3 comparison table in `docs/q3_vehicle_sales_comparison.md`, executes the notebook using a clean kernel, runs the test suite, launches the Dash server, waits for an HTTP 200 response, and captures both real full-page browser screenshots after verifying all chart titles. After successful capture it writes `docs/local_execution_verification.md`, including dataset and PNG SHA-256 checksums and confirmed notebook output counts. **It does not upload anything to GitHub.** Failures return a nonzero exit code instead of declaring success. Re-run `python -m pytest -q` after successful completion to confirm integration/screenshot tests.
+Run `FINISH_ON_WINDOWS.bat` from an Internet-connected Windows machine with Python 3.10+ installed. This creates a local virtual environment, installs requirements, downloads and audits the **official** IBM dataset, computes the Q3 comparison table in `docs/q3_vehicle_sales_comparison.md`, executes the notebook using a clean kernel, runs the test suite, launches the Dash server, waits for an HTTP 200 response, and captures both real full-page browser screenshots after verifying all chart titles. During the run, including failed steps, it writes `docs/local_execution_verification.md`, including dataset and PNG SHA-256 checksums and confirmed notebook output counts. **It does not upload anything to GitHub.** Failures return a nonzero exit code instead of declaring success. Re-run `python -m pytest -q` after successful completion to confirm integration/screenshot tests.
 
 The browser screenshot automation uses an explicit Plotly SVG-title check rather than fixed sleep delays. The local dataset is excluded from Git by default because redistribution permission has not been established.
 
@@ -124,3 +124,11 @@ IBM Skills Network and Coursera are acknowledged as the original project prompt 
 The uploaded final archive was rechecked, and **19 offline/unit checks passed; five data/browser integration checks were skipped**. The actual notebook and dashboard could not complete because the official IBM CSV and Dash dependency were inaccessible from the execution environment. See [final execution and validation report](FINAL_EXECUTION_AND_VALIDATION_REPORT.md) for exact commands and error evidence.
 
 If the original IBM CSV is already present at `data/historical_automobile_sales.csv`, `scripts/fetch_dataset.py` now validates and preserves it rather than re-downloading or overwriting it. This change does not establish provenance for arbitrary CSVs; use the official course source only.
+
+## Windows completion troubleshooting (2026-11-11)
+
+If the earlier batch file appeared to finish but did not create `docs/local_execution_verification.md`, use the corrected `FINISH_ON_WINDOWS.bat` in this repository. It runs from its own directory using `.venv\\Scripts\\python.exe`, logs **every stage**, and always writes a status report even after a failed dependency installation, dataset validation, or dashboard launch. A failure returns a nonzero process exit code.
+
+Your IBM CSV should already be at `data/historical_automobile_sales.csv`. The runner validates and **does not overwrite** an existing valid CSV. Do not replace this local file when upgrading the project source. After running, inspect `docs/local_execution_verification.md`. To share troubleshooting evidence in one file without redistributing IBM data, use the automatically generated `WINDOWS_EXECUTION_DIAGNOSTICS.zip` in the project root. These machine-specific files are excluded from Git.
+
+**Important:** This package's 23 passed / 5 skipped offline tests are not a substitute for the remaining fresh-kernel notebook, live Dash and real browser checks on Windows.

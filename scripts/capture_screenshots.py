@@ -32,10 +32,34 @@ def verify_charts(page, titles, year=None):
     page.wait_for_function("""() => [...document.querySelectorAll('.chart-item .js-plotly-plot')].length === 4 &&
         [...document.querySelectorAll('.chart-item .js-plotly-plot')].every(el => el.querySelector('.main-svg .gtitle') && (el.querySelectorAll('.plot').length > 0 || el.querySelectorAll('.slice').length > 0))""", timeout=45000)
 
+def launch_available_browser(playwright):
+    """Use a locally installed browser; never trigger a browser download.
+
+    Playwright-managed Chromium is preferred. On Windows, an already installed
+    Microsoft Edge/Google Chrome can be used if the managed download timed out.
+    """
+    attempts = []
+    candidates = [("Playwright Chromium", {})]
+    if __import__("sys").platform != "win32" and Path("/usr/bin/chromium").exists():
+        candidates.append(("system Chromium", {"executable_path": "/usr/bin/chromium"}))
+    if __import__("sys").platform == "win32":
+        candidates += [("Microsoft Edge", {"channel": "msedge"}),
+                       ("Google Chrome", {"channel": "chrome"})]
+    for label, options in candidates:
+        try:
+            browser = playwright.chromium.launch(headless=True, **options)
+            print(f"BROWSER PASS: launched {label}")
+            return browser
+        except Exception as exc:
+            attempts.append(f"{label}: {type(exc).__name__}: {exc}")
+    raise RuntimeError("No usable local Playwright Chromium/Edge/Chrome installation. "
+                       "Checked without downloading browsers.\n" + "\n".join(attempts))
+
+
 def capture():
     OUT.mkdir(exist_ok=True)
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, executable_path='/usr/bin/chromium' if Path('/usr/bin/chromium').exists() else None)
+        browser = launch_available_browser(p)
         page = browser.new_page(viewport={'width': 1440, 'height': 1024}, device_scale_factor=1)
         errors = []
         page.on('pageerror', lambda exc: errors.append(str(exc)))

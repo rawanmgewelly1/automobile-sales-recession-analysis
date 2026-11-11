@@ -194,9 +194,11 @@ class Pipeline:
                 self.check_server()
                 self.record("Dashboard HTTP startup", "PASS", "http://127.0.0.1:8050/ served HTTP 200", exit_code=0,
                             logfile=LOGS / "dashboard_server.log")
-                chromium_ok = self.command("Install Playwright Chromium", ["-m", "playwright", "install", "chromium"], timeout=420)
-                # Also attempt browser capture if Chromium installer fails: a system browser may already exist.
-                browser_ok = self.command("Browser verification and genuine screenshots", ["scripts/capture_screenshots.py"], timeout=240)
+                # Probe cached Chromium or an installed Edge/Chrome first. A forced
+                # 420-second Chromium download previously timed out on Windows.
+                browser_available = self.command("Check locally installed Playwright browser", ["scripts/check_browser_available.py"], timeout=45)
+                browser_ok = self.command("Browser verification and genuine screenshots", ["scripts/capture_screenshots.py"],
+                                          prerequisite=browser_available, timeout=240)
             except Exception as exc:
                 self.fatal = True
                 self.record("Dashboard HTTP startup", "FAIL", f"{type(exc).__name__}: {exc}", logfile=LOGS / "dashboard_server.log")

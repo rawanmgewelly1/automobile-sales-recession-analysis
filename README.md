@@ -118,3 +118,9 @@ The course material describes an illustrative company and an educational dataset
 ## Credits and integrity
 
 IBM Skills Network and Coursera are acknowledged as the original project prompt and dataset source. This is an original reconstruction of the described exercises, **not** a claim that IBM endorses the repository or that the original starter notebook was edited. Third-party sample solutions were used only to confirm task structure and known component names.
+
+## Latest execution audit (11 November 2026)
+
+The uploaded final archive was rechecked, and **19 offline/unit checks passed; five data/browser integration checks were skipped**. The actual notebook and dashboard could not complete because the official IBM CSV and Dash dependency were inaccessible from the execution environment. See [final execution and validation report](FINAL_EXECUTION_AND_VALIDATION_REPORT.md) for exact commands and error evidence.
+
+If the original IBM CSV is already present at `data/historical_automobile_sales.csv`, `scripts/fetch_dataset.py` now validates and preserves it rather than re-downloading or overwriting it. This change does not establish provenance for arbitrary CSVs; use the official course source only.

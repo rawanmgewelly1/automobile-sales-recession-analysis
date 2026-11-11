@@ -1,8 +1,12 @@
 """IBM DV0101EN automobile sales dashboard; source data never fabricated."""
 from pathlib import Path
+import sys
 import pandas as pd
 import plotly.express as px
 from dash import Dash, Input, Output, dcc, html
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+from check_dataset import parse_months
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "historical_automobile_sales.csv"
 REQUIRED_COLUMNS = {"Year", "Month", "Recession", "Automobile_Sales", "Vehicle_Type", "Advertising_Expenditure", "unemployment_rate"}
@@ -15,10 +19,10 @@ def load_data(path=DATA_PATH):
     if missing:
         raise ValueError(f"Required columns missing: {sorted(missing)}")
     frame["Year"] = pd.to_numeric(frame["Year"], errors="raise").astype(int)
-    frame["Month"] = pd.to_numeric(frame["Month"], errors="raise").astype(int)
+    frame["Month_Number"] = parse_months(frame["Month"])
     for column in ["Recession", "Automobile_Sales", "Advertising_Expenditure", "unemployment_rate"]:
         frame[column] = pd.to_numeric(frame[column], errors="raise")
-    if frame.empty or not frame["Recession"].isin([0, 1]).all() or not frame["Month"].between(1, 12).all():
+    if frame.empty or not frame["Recession"].isin([0, 1]).all():
         raise ValueError("Dataset empty or invalid recession/month values")
     return frame
 
@@ -42,12 +46,15 @@ def build_yearly_figures(frame, year):
         return []
     subset = frame.loc[frame["Year"] == int(year)]
     trend = frame.groupby("Year", as_index=False)["Automobile_Sales"].mean()
-    monthly = subset.groupby("Month", as_index=False)["Automobile_Sales"].sum()
+    if "Month_Number" not in subset.columns:
+        # Compatibility with existing numeric-month DataFrame fixtures.
+        subset = subset.assign(Month_Number=pd.to_numeric(subset["Month"], errors="raise").astype(int))
+    monthly = subset.groupby("Month_Number", as_index=False)["Automobile_Sales"].sum().sort_values("Month_Number")
     vehicles = subset.groupby("Vehicle_Type", as_index=False)["Automobile_Sales"].mean()
     advertising = subset.groupby("Vehicle_Type", as_index=False)["Advertising_Expenditure"].sum()
     return [
         px.line(trend, x="Year", y="Automobile_Sales", markers=True, title="Yearly Average Automobile Sales (All Years)"),
-        px.line(monthly, x="Month", y="Automobile_Sales", markers=True, title=f"Monthly Total Automobile Sales — {year}"),
+        px.line(monthly, x="Month_Number", y="Automobile_Sales", markers=True, title=f"Monthly Total Automobile Sales — {year}", labels={"Month_Number": "Month"}).update_xaxes(tickmode="array", tickvals=list(range(1, 13)), ticktext=["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]),
         px.bar(vehicles, x="Vehicle_Type", y="Automobile_Sales", title=f"Average Sales by Vehicle Type — {year}"),
         px.pie(advertising, names="Vehicle_Type", values="Advertising_Expenditure", title=f"Advertising Expenditure by Vehicle Type — {year}"),
     ]

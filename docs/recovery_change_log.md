@@ -20,3 +20,7 @@ Source archive: `automobile-sales-recession-analysis-WINDOWS-RECOVERY(1).zip`.
 - Original IBM CSV runtime, fresh notebook, Dash browser, screenshots, and real-data Q3 remain unverified here.
 
 The supplied Windows computer must run the corrected pipeline to produce environment-specific evidence. Its original CSV must stay in `data/historical_automobile_sales.csv` and should not be overwritten.
+
+## 2026-11-11 — Month names in original CSV
+
+Fixed the month-label parsing mismatch in the validator, notebook loader, and Dash loader. Preserved original Month labels and added numeric Month_Number only for chart ordering. Added regression tests and documented Linux-only verification in `docs/MONTH_FIX_LOCAL_VERIFICATION.md`. The actual Windows CSV and runtime were not available in this execution environment.
